@@ -1,0 +1,105 @@
+# Name = OZAN KAMALI
+# Student ID = 2521680
+
+##########################################################
+# DESCRIPTIONS OF THE CHANGES
+##########################################################
+# Firstly, I have implemented the cmpq instruction to get rid of unnecessary subtractions in our code, 
+# for this I have changed the pipe-full.hcl accordingly with mainly doing the same steps I did in PART2.  
+# Secondly, I figured that we do not need to right shift pow every loop step because the values we are 
+# checking are already predetermined with pow = 128, 64, 32, 16, 8, 4, 2, 1, and 0. With this in mind
+# I have added a constant data with .align called pow and incremented the address after the loop ended
+# while dereferencing it every loop start.   
+# Finally, I have added a small adjustment to outer_updates which eliminates the need to irmovq $8, %r8 
+# because the %r8 register is guaranteed to be initialized to $8 before entering outer_updates.
+##########################################################
+# Changes to CPE:
+# 1. 386.36 -> ~356 (After cmpq is implemented.)
+# 2. ~356 -> ~146 (After introducing constant pow data.)
+# 3. ~146 -> 145.68 (After eliminating unneccesary r8 update.)
+##########################################################
+
+
+
+#/* $begin to_binary_string-ys */
+##################################################################
+# to_binary_string.ys - Convert an arr block of len integers to 
+# binary strings and store in buff
+# Return the sum of integers contained in arr.
+# Include your name and ID here.
+# Describe how and why you modified the baseline code.
+
+	.align 8
+pow:	.quad 128
+	.quad 64
+	.quad 32
+	.quad 16
+	.quad 8
+	.quad 4
+	.quad 2
+	.quad 1
+	.quad 0
+
+
+##################################################################
+# Do not modify this portion
+# Function prologue.
+# %rdi = arr, %rsi = buff, %rdx = len
+to_binary_string:
+##################################################################
+# You can modify this portion
+    # Loop header
+    xorq %rax,%rax    	    # %rax = sum = 0;
+    		            # %rcx = pow = 128
+
+    andq %rdx,%rdx    	    # %rdx = len <= 0?
+    jle Done                # if so, goto Done:
+
+Loop:    
+    mrmovq (%rdi), %r9      # %r9 = val
+    irmovq $8, %r8          # r8 = 8 
+    addq %r8, %rdi          # arr++
+    addq %r9, %rax          # sum += val
+    rrmovq %rsi, %r10       # temp = buff
+    irmovq pow, %rcx        # rcx = pow
+    
+
+inner_loop:
+    mrmovq (%rcx), %r12     # r12 = (pow)
+    andq %r12, %r12    	    # pow <= 0?
+    jle outer_updates
+    cmpq %r12, %r9          # val >= pow 
+    jl else                 # if val < pow 
+    irmovq $49, %r8         
+    rmmovq %r8, (%r10)      # *temp = '1'
+    subq %r12, %r9          # else : val -= pow;
+    jmp inner_updates
+
+else:   
+    irmovq $48, %r8        
+    rmmovq %r8, (%r10)      # *temp = '0'
+
+inner_updates:  
+    irmovq $1, %r8	    # r8 = 1
+    addq %r8, %r10          # temp++
+    irmovq $8, %r8
+    addq %r8, %rcx          # pow++
+    jmp inner_loop	    	
+
+# r8 = 8 when entering here...
+outer_updates:
+    addq %r8, %rsi    	     # buff++
+    irmovq $1, %r8
+    subq %r8, %rdx    	     # len--
+    andq %rdx,%rdx    	     # len > 0?
+    jg Loop                  # if so, goto Loop
+
+##################################################################
+# Do not modify the following section of code
+# Function epilogue.
+Done:
+    ret
+##################################################################
+# Keep the following label at the end of your function
+End:
+#/* $end to_binary_string-ys */

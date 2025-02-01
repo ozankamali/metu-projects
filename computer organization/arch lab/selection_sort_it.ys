@@ -1,0 +1,115 @@
+# Name = OZAN KAMALI
+# Student ID = 2521680
+
+	.pos 0
+	irmovq stack, %rsp
+	call main
+	halt
+
+main:	
+	irmovq head, %rdi
+	call sort
+	ret
+
+sort:	
+	rrmovq %rdi, %r8 # head 
+	irmovq $0, %r9 #sorted = NULL
+	andq %r8, %r8 #head != NULL  
+	je returnh # return head
+	mrmovq 8(%r8), %r14 # head->next != NULL
+	andq %r14, %r14
+	je returnh #return head
+
+while:	
+	andq %r8, %r8 # head != NULL
+	je return
+	rrmovq %r8, %r10 #max = head			 
+	irmovq $0, %r11 #prevmax = NULL   	  	
+	rrmovq %r8, %r12 #curr = head
+	irmovq $0, %r13 #prev = NULL
+		
+fmax:	
+	andq %r12, %r12 #curr != NULL
+	je rmax
+	mrmovq (%r12), %r14 #curr->data
+	mrmovq (%r10), %rax #max->data
+	cmpq %r14, %rax #curr->data, max->data
+	jge def
+  	rrmovq %r12, %r10 # max = curr
+	rrmovq %r13, %r11 # prevmax = prev
+
+def:	
+	rrmovq %r12, %r13 # prev = curr
+	mrmovq 8(%r12), %r12 # curr = curr -> next 
+	jmp fmax
+
+rmax:	
+	cmpq %r10, %r8
+	jne else
+	mrmovq 8(%r8), %r8 # head = head->next
+  	jmp insert
+
+else:	
+	mrmovq 8(%r10), %r14 #max->next
+	rmmovq %r14, 8(%r11) #prevmax->next = max->next
+
+insert:	
+	rmmovq %r9, 8(%r10)
+	rrmovq %r10, %r9 
+	jmp while
+
+return:	
+	rrmovq %r9, %rax
+	ret		
+
+returnh:
+	rrmovq %r8, %rax
+	ret
+
+	.pos 0x200
+head:
+	.quad 17
+	.quad node1
+node1:
+	.quad 24
+	.quad node2
+node2:
+	.quad 6
+	.quad node3
+node3:
+	.quad 11
+	.quad node4
+node4:
+	.quad 4
+	.quad node5
+node5:
+	.quad 5
+	.quad node6
+node6:
+	.quad 3
+	.quad node7
+node7:
+	.quad 40
+	.quad node8
+node8:
+	.quad 19
+	.quad node9
+node9:
+	.quad 52
+	.quad node10
+node10:
+	.quad 8
+	.quad 0 # Remember that 0 is null.
+
+
+
+	.pos 0x500
+stack:
+
+
+
+
+
+
+
+
