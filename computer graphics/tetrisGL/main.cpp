@@ -1,13 +1,3 @@
-//
-// Author: Ahmet Oguz Akyuz
-// 
-// This is a sample code that draws a single block piece at the center
-// of the window. It does many boilerplate work for you -- but no
-// guarantees are given about the optimality and bug-freeness of the
-// code. You can use it to get started or you can simply ignore its
-// presence. You can modify it in any way that you like.
-//
-//
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
